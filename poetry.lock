@@ -360,14 +360,14 @@ uvicorn = "*"
 
 [[package]]
 name = "osbot-fast-api-serverless"
-version = "1.27.0"
+version = "1.28.0"
 description = "OSBot-Fast-API-Serverless"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "osbot_fast_api_serverless-1.27.0-py3-none-any.whl", hash = "sha256:242ee0e99ca155161b1c79f22cfe55c722d6c931b5ec23ec86c76d90468e3abc"},
-    {file = "osbot_fast_api_serverless-1.27.0.tar.gz", hash = "sha256:a2eeed32e23cdf4a961db4ec6505ddccfc0bfd640ded461c59c658cc8f545000"},
+    {file = "osbot_fast_api_serverless-1.28.0-py3-none-any.whl", hash = "sha256:fd81d424cef6e0d4dd1f439f2513348d0fc43a575adc3b096b185aecb9454aad"},
+    {file = "osbot_fast_api_serverless-1.28.0.tar.gz", hash = "sha256:e5740a9dbf1b578938519dd521da236cb164d4dbb4ee21cd3cd757df7139297a"},
 ]
 
 [package.dependencies]
