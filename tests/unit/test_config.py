@@ -1,8 +1,8 @@
-from unittest                          import TestCase
-from mgraph_ai_service_aws__comprehend.config      import SERVICE_NAME
+from unittest                                   import TestCase
+from mgraph_ai_service_aws_comprehend.config    import SERVICE_NAME
 
 
 class test_config(TestCase):
 
     def test__config_vars(self):
-        assert SERVICE_NAME                   == 'mgraph_ai_service_aws__comprehend'
+        assert SERVICE_NAME                   == 'mgraph_ai_service_aws_comprehend'

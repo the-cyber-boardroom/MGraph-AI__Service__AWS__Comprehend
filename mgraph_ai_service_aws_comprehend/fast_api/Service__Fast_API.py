@@ -1,7 +1,7 @@
 from osbot_fast_api_serverless.fast_api.Serverless__Fast_API import Serverless__Fast_API
-from mgraph_ai_service_aws__comprehend.config                           import FAST_API__TITLE
-from mgraph_ai_service_aws__comprehend.fast_api.routes.Routes__Info     import Routes__Info
-from mgraph_ai_service_aws__comprehend.utils.Version                    import version__mgraph_ai_service_aws__comprehend
+from mgraph_ai_service_aws_comprehend.config                           import FAST_API__TITLE
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Info     import Routes__Info
+from mgraph_ai_service_aws_comprehend.utils.Version                    import version__mgraph_ai_service_aws_comprehend
 
 
 
@@ -18,7 +18,7 @@ class Service__Fast_API(Serverless__Fast_API):
     def setup_fast_api_title_and_version(self):                     # todo: move this to the Fast_API class
         app       = self.app()
         app.title = self.fast_api__title()
-        app.version = version__mgraph_ai_service_aws__comprehend
+        app.version = version__mgraph_ai_service_aws_comprehend
         return self
     def setup_routes(self):
         self.add_routes(Routes__Info  )

@@ -1,11 +1,11 @@
-from unittest                                                               import TestCase
-from osbot_fast_api.api.routes.Fast_API__Routes                             import Fast_API__Routes
-from osbot_utils.type_safe.Type_Safe                                        import Type_Safe
-from osbot_utils.utils.Misc                                                 import list_set
-from osbot_utils.utils.Objects                                              import base_classes
-from mgraph_ai_service_aws__comprehend.fast_api.routes.Routes__Info                    import Routes__Info
-from mgraph_ai_service_aws__comprehend.service.info.schemas.Schema__Server__Versions   import Schema__Server__Versions
-from mgraph_ai_service_aws__comprehend.utils.Version                                   import version__mgraph_ai_service_aws__comprehend
+from unittest                                                                         import TestCase
+from osbot_fast_api.api.routes.Fast_API__Routes                                       import Fast_API__Routes
+from osbot_utils.type_safe.Type_Safe                                                  import Type_Safe
+from osbot_utils.utils.Misc                                                           import list_set
+from osbot_utils.utils.Objects                                                        import base_classes
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Info                    import Routes__Info
+from mgraph_ai_service_aws_comprehend.service.info.schemas.Schema__Server__Versions   import Schema__Server__Versions
+from mgraph_ai_service_aws_comprehend.utils.Version                                   import version__mgraph_ai_service_aws_comprehend
 
 
 class test_Routes__Info(TestCase):
@@ -22,9 +22,9 @@ class test_Routes__Info(TestCase):
     def test_versions(self):
         with self.routes_info.versions() as _:
             assert type(_) is Schema__Server__Versions
-            assert list_set(_) == [ 'mgraph_ai_service_aws__comprehend'   ,
+            assert list_set(_) == [ 'mgraph_ai_service_aws_comprehend'   ,
                                     'osbot_aws'                ,
                                     'osbot_fast_api'           ,
                                     'osbot_fast_api_serverless',
                                     'osbot_utils'              ]
-            assert _.mgraph_ai_service_aws__comprehend == version__mgraph_ai_service_aws__comprehend
+            assert _.mgraph_ai_service_aws_comprehend == version__mgraph_ai_service_aws_comprehend

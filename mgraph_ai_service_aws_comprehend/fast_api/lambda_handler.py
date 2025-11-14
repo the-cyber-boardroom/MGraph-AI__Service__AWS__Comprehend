@@ -5,7 +5,7 @@ import os
 if os.getenv('AWS_REGION'):  # only execute if we are not running inside an AWS Lambda function
 
     from osbot_aws.aws.lambda_.boto3__lambda      import load_dependencies       # using the lightweight file (which only has the boto3 calls required to load_dependencies)
-    from mgraph_ai_service_aws__comprehend.config import LAMBDA_DEPENDENCIES__AWS__COMPREHEND
+    from mgraph_ai_service_aws_comprehend.config import LAMBDA_DEPENDENCIES__AWS__COMPREHEND
 
     load_dependencies(LAMBDA_DEPENDENCIES__AWS__COMPREHEND)
 
@@ -17,7 +17,7 @@ if os.getenv('AWS_REGION'):  # only execute if we are not running inside an AWS 
 
     clear_osbot_modules()
 
-from mgraph_ai_service_aws__comprehend.fast_api.Service__Fast_API import Service__Fast_API
+from mgraph_ai_service_aws_comprehend.fast_api.Service__Fast_API import Service__Fast_API
 
 with Service__Fast_API() as _:
     _.setup()

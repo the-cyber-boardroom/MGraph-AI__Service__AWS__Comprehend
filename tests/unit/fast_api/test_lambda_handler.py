@@ -1,10 +1,10 @@
 import re
 import types
 import pytest
-from unittest                                            import TestCase
-from osbot_utils.utils.Json                              import str_to_json
-from tests.unit.Service__Fast_API__Test_Objs             import setup_local_stack
-from mgraph_ai_service_aws__comprehend.fast_api.lambda_handler      import run
+from unittest                                                   import TestCase
+from osbot_utils.utils.Json                                     import str_to_json
+from tests.unit.Service__Fast_API__Test_Objs                    import setup_local_stack
+from mgraph_ai_service_aws_comprehend.fast_api.lambda_handler   import run
 
 
 class test_lambda_handler(TestCase):
