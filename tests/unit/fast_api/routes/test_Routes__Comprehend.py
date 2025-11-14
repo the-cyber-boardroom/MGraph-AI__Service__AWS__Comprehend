@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                 import TestCase
 from fastapi                                                                                  import FastAPI
 from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                      import Comprehend__with_temp_role
@@ -10,6 +11,7 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Syntax  
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content         import Schema__Comprehend__Detect_Toxic_Content
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                   import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                 import Safe_Str__Comprehend__Text
+from osbot_utils.utils.Env                                                                    import in_github_action
 from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend                      import Routes__Comprehend
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Request             import Schema__Comprehend__Request
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                             import Comprehend__Service
@@ -19,6 +21,8 @@ class test_Routes__Comprehend(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        if in_github_action():
+            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
         cls.app                = FastAPI()
         cls.comprehend         = Comprehend__with_temp_role()
         cls.comprehend_detect  = cls.comprehend.detect()

@@ -1,17 +1,17 @@
+import pytest
 from unittest                                                                                     import TestCase
 from fastapi                                                                                      import FastAPI
 from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                          import Comprehend__with_temp_role
-from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment import Schema__Comprehend__Batch_Item__Detect_Sentiment
+from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment      import Schema__Comprehend__Batch_Item__Detect_Sentiment
 from osbot_utils.type_safe.primitives.core.Safe_Float                                             import Safe_Float
 from osbot_utils.type_safe.primitives.core.Safe_UInt                                              import Safe_UInt
 from osbot_utils.type_safe.primitives.domains.cryptography.safe_str.Safe_Str__Hash                import Safe_Str__Hash
 from osbot_utils.type_safe.primitives.domains.common.safe_str.Safe_Str__Text                      import Safe_Str__Text
-from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment                 import Schema__Comprehend__Detect_Sentiment
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content             import Schema__Comprehend__Detect_Toxic_Content
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                       import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                     import Safe_Str__Comprehend__Text
-from osbot_utils.type_safe.type_safe_core.collections.Type_Safe__Dict import Type_Safe__Dict
-
+from osbot_utils.type_safe.type_safe_core.collections.Type_Safe__Dict                             import Type_Safe__Dict
+from osbot_utils.utils.Env                                                                        import in_github_action
 from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Batch                   import Routes__Comprehend__Batch
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Request           import Schema__Comprehend__Batch_Request
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Threshold_Request import Schema__Comprehend__Batch_Threshold_Request
@@ -24,6 +24,9 @@ class test_Routes__Comprehend__Batch(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        if in_github_action():
+            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+
         cls.app    = FastAPI()
         cls.comprehend         = Comprehend__with_temp_role()
         cls.comprehend_detect  = cls.comprehend.detect()
