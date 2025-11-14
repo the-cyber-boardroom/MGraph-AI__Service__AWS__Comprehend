@@ -3,11 +3,14 @@ from fastapi                                                                    
 from osbot_fast_api.api.Fast_API                                                 import ENV_VAR__FAST_API__AUTH__API_KEY__NAME, ENV_VAR__FAST_API__AUTH__API_KEY__VALUE
 from osbot_fast_api.api.schemas.consts.consts__Fast_API                          import EXPECTED_ROUTES__SET_COOKIE
 from osbot_fast_api_serverless.fast_api.routes.Routes__Info                      import ROUTES_INFO__HEALTH__RETURN_VALUE, ROUTES_PATHS__INFO
-from osbot_local_stack.local_stack.Local_Stack                                   import Local_Stack
 from osbot_utils.utils.Env                                                       import get_env
 from starlette.testclient                                                        import TestClient
 from osbot_fast_api_serverless.utils.testing.skip_tests                          import skip__if_not__in_github_actions
 from mgraph_ai_service_aws_comprehend.fast_api.AWS_Comprehend__Service__Fast_API import AWS_Comprehend__Service__Fast_API
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend import ROUTES_PATHS__COMPREHEND
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Batch import ROUTES_PATHS__COMPREHEND_BATCH
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Cache import ROUTES_PATHS__COMPREHEND_CACHE
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Helpers import ROUTES_PATHS__COMPREHEND_HELPERS
 from tests.unit.Service__Fast_API__Test_Objs                                     import setup__service_fast_api_test_objs, Service__Fast_API__Test_Objs, TEST_API_KEY__NAME
 
 
@@ -27,7 +30,6 @@ class test_Service__Fast_API__client(TestCase):
             assert type(_.fast_api        ) is AWS_Comprehend__Service__Fast_API
             assert type(_.fast_api__app   ) is FastAPI
             assert type(_.fast_api__client) is TestClient
-            assert type(_.local_stack     ) is Local_Stack
             assert self.fast_api            == _.fast_api
             assert self.client              == _.fast_api__client
 
@@ -56,5 +58,9 @@ class test_Service__Fast_API__client(TestCase):
             assert _.is_local_stack_configured_and_available() is True
 
     def test__config_fast_api_routes(self):
-        assert self.fast_api.routes_paths() == sorted(ROUTES_PATHS__INFO          +
-                                                      EXPECTED_ROUTES__SET_COOKIE )
+        assert self.fast_api.routes_paths() == sorted(ROUTES_PATHS__INFO               +
+                                                      ROUTES_PATHS__COMPREHEND         +
+                                                      ROUTES_PATHS__COMPREHEND_BATCH   +
+                                                      ROUTES_PATHS__COMPREHEND_CACHE   +
+                                                      ROUTES_PATHS__COMPREHEND_HELPERS +
+                                                      EXPECTED_ROUTES__SET_COOKIE      )

@@ -1,5 +1,7 @@
 from unittest                                                                                     import TestCase
 from fastapi                                                                                      import FastAPI
+from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                          import Comprehend__with_temp_role
+from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment import Schema__Comprehend__Batch_Item__Detect_Sentiment
 from osbot_utils.type_safe.primitives.core.Safe_Float                                             import Safe_Float
 from osbot_utils.type_safe.primitives.core.Safe_UInt                                              import Safe_UInt
 from osbot_utils.type_safe.primitives.domains.cryptography.safe_str.Safe_Str__Hash                import Safe_Str__Hash
@@ -8,11 +10,14 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentimen
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content             import Schema__Comprehend__Detect_Toxic_Content
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                       import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                     import Safe_Str__Comprehend__Text
+from osbot_utils.type_safe.type_safe_core.collections.Type_Safe__Dict import Type_Safe__Dict
+
 from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Batch                   import Routes__Comprehend__Batch
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Request           import Schema__Comprehend__Batch_Request
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Threshold_Request import Schema__Comprehend__Batch_Threshold_Request
 from mgraph_ai_service_aws_comprehend.schemas.response.Schema__Comprehend__Batch_Boolean_Response import Schema__Comprehend__Batch_Boolean_Response
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Batch__Service                          import Comprehend__Batch__Service
+from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                                 import Comprehend__Service
 
 
 class test_Routes__Comprehend__Batch(TestCase):
@@ -20,7 +25,14 @@ class test_Routes__Comprehend__Batch(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app    = FastAPI()
-        cls.routes = Routes__Comprehend__Batch(app=cls.app).setup()
+        cls.comprehend         = Comprehend__with_temp_role()
+        cls.comprehend_detect  = cls.comprehend.detect()
+        cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
+        cls.comprehend_batch   = cls.comprehend.batch()
+        cls.batch_service      = Comprehend__Batch__Service(comprehend_batch   = cls.comprehend_batch  ,
+                                                            comprehend_service = cls.comprehend_service)
+        cls.routes             = Routes__Comprehend__Batch (app           = cls.app          ,
+                                                            batch_service = cls.batch_service).setup()
 
     def test__setUpClass(self):                                                # Test routes setup
         with self.routes as _:
@@ -28,11 +40,11 @@ class test_Routes__Comprehend__Batch(TestCase):
             assert _.tag                    == 'comprehend-batch'
             assert type(_.batch_service)   is Comprehend__Batch__Service
             assert _.app                    == self.app
-            assert _.routes_paths()         == [ '/comprehend-batch/detect-sentiment',
-                                                 '/comprehend-batch/detect-toxic'    ,
-                                                 '/comprehend-batch/is-negative'     ,
-                                                 '/comprehend-batch/is-positive'     ,
-                                                 '/comprehend-batch/is-toxic'        ]
+            assert _.routes_paths()         == [ '/detect-sentiment',
+                                                 '/detect-toxic'    ,
+                                                 '/is-negative'     ,
+                                                 '/is-positive'     ,
+                                                 '/is-toxic'        ]
 
     # ========================================
     # detect_sentiment Tests
@@ -46,10 +58,10 @@ class test_Routes__Comprehend__Batch(TestCase):
 
         response = self.routes.detect_sentiment(request)
 
-        assert type(response) is dict
+        assert type(response) is Type_Safe__Dict
         assert len(response)  == 1
         assert Safe_Str__Hash("abc1234567") in response
-        assert type(response[Safe_Str__Hash("abc1234567")]) is Schema__Comprehend__Detect_Sentiment
+        assert type(response[Safe_Str__Hash("abc1234567")]) is Schema__Comprehend__Batch_Item__Detect_Sentiment
 
     def test__detect_sentiment__multiple_texts(self):                          # Test batch sentiment with multiple texts
         texts   = {Safe_Str__Hash("aaa1234567"): Safe_Str__Comprehend__Text("Positive"),
@@ -61,10 +73,10 @@ class test_Routes__Comprehend__Batch(TestCase):
 
         response = self.routes.detect_sentiment(request)
 
-        assert type(response) is dict
+        assert type(response) is Type_Safe__Dict
         assert len(response)  == 3
         assert all(hash_key in response for hash_key in texts.keys())
-        assert all(type(result) is Schema__Comprehend__Detect_Sentiment for result in response.values())
+        assert all(type(result) is Schema__Comprehend__Batch_Item__Detect_Sentiment for result in response.values())
 
     def test__detect_sentiment__empty(self):                                   # Test batch sentiment with empty dict
         texts   = {}
@@ -74,7 +86,7 @@ class test_Routes__Comprehend__Batch(TestCase):
 
         response = self.routes.detect_sentiment(request)
 
-        assert type(response) is dict
+        assert type(response) is Type_Safe__Dict
         assert len(response)  == 0
 
     # ========================================
@@ -89,7 +101,7 @@ class test_Routes__Comprehend__Batch(TestCase):
 
         response = self.routes.detect_toxic(request)
 
-        assert type(response) is dict
+        assert type(response) is Type_Safe__Dict
         assert len(response)  == 1
         assert Safe_Str__Hash("abc1234567") in response
         assert type(response[Safe_Str__Hash("abc1234567")]) is Schema__Comprehend__Detect_Toxic_Content
@@ -104,7 +116,7 @@ class test_Routes__Comprehend__Batch(TestCase):
 
         response = self.routes.detect_toxic(request)
 
-        assert type(response) is dict
+        assert type(response) is Type_Safe__Dict
         assert len(response)  == 3
         assert all(type(result) is Schema__Comprehend__Detect_Toxic_Content for result in response.values())
 

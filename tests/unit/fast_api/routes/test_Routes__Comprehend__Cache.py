@@ -1,9 +1,9 @@
 from unittest                                                                            import TestCase
 from fastapi                                                                             import FastAPI
-from osbot_utils.testing.__                                                              import __
-from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Cache         import Routes__Comprehend__Cache
-from mgraph_ai_service_aws_comprehend.schemas.response.Schema__Comprehend__Cache_Info   import Schema__Comprehend__Cache_Info
-from mgraph_ai_service_aws_comprehend.service.Comprehend__Cache__Service               import Comprehend__Cache__Service
+from osbot_utils.type_safe.primitives.core.Safe_UInt                                     import Safe_UInt
+from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Cache          import Routes__Comprehend__Cache
+from mgraph_ai_service_aws_comprehend.schemas.response.Schema__Comprehend__Cache_Info    import Schema__Comprehend__Cache_Info
+from mgraph_ai_service_aws_comprehend.service.Comprehend__Cache__Service                 import Comprehend__Cache__Service
 
 
 class test_Routes__Comprehend__Cache(TestCase):
@@ -19,8 +19,8 @@ class test_Routes__Comprehend__Cache(TestCase):
             assert _.tag                    == 'comprehend-cache'
             assert type(_.cache_service)   is Comprehend__Cache__Service
             assert _.app                    == self.app
-            assert _.routes_paths()         == [ '/comprehend-cache/clear',
-                                                 '/comprehend-cache/info'  ]
+            assert _.routes_paths()         == [ '/clear',
+                                                 '/info'  ]
 
     # ========================================
     # info Tests
@@ -31,8 +31,8 @@ class test_Routes__Comprehend__Cache(TestCase):
 
         assert type(response)           is Schema__Comprehend__Cache_Info
         assert response.namespace       == 'aws-comprehend'
-        assert type(response.total_entries) is int                             # Placeholder returns 0
-        assert type(response.size_bytes)    is int                             # Placeholder returns 0
+        assert type(response.total_entries) is Safe_UInt                       # Placeholder returns 0
+        assert type(response.size_bytes)    is Safe_UInt                       # Placeholder returns 0
 
     def test__info__returns_placeholder_values(self):                          # Test that info returns placeholder values
         response = self.routes.info()

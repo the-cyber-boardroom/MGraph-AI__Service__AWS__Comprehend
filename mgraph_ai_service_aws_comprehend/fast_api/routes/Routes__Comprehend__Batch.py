@@ -7,7 +7,7 @@ from osbot_utils.type_safe.primitives.domains.cryptography.safe_str.Safe_Str__Ha
 from osbot_utils.type_safe.primitives.domains.common.safe_str.Safe_Str__Text                        import Safe_Str__Text
 from osbot_fast_api.api.routes.Fast_API__Routes                                                     import Fast_API__Routes
 from osbot_fast_api.api.schemas.safe_str.Safe_Str__Fast_API__Route__Tag                             import Safe_Str__Fast_API__Route__Tag
-from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment                   import Schema__Comprehend__Detect_Sentiment
+from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment        import Schema__Comprehend__Batch_Item__Detect_Sentiment
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content               import Schema__Comprehend__Detect_Toxic_Content
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Request             import Schema__Comprehend__Batch_Request
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Threshold_Request   import Schema__Comprehend__Batch_Threshold_Request
@@ -23,17 +23,19 @@ ROUTES_PATHS__COMPREHEND_BATCH = [f'/{TAG__ROUTES_COMPREHEND_BATCH}' + '/detect-
                                   f'/{TAG__ROUTES_COMPREHEND_BATCH}' + '/is-toxic'          ]
 
 
-class Routes__Comprehend__Batch(Fast_API__Routes):                                  # Batch routes - process multiple texts at once
-    tag           : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_BATCH   # OpenAPI tag
-    batch_service : Comprehend__Batch__Service                                      # Batch processing service
+# todo: refactor the logic on the is_* methods (and the helper method) into a separate service class
+#       since these Route_* classes should have no business logic
+class Routes__Comprehend__Batch(Fast_API__Routes):                                                     # Batch routes - process multiple texts at once using native AWS batch APIs
+    tag           : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_BATCH                      # OpenAPI tag
+    batch_service : Comprehend__Batch__Service                                                         # Batch processing service
 
-    # ========================================
-    # BATCH DETECTION
-    # ========================================
+    # ============================================================================
+    # BATCH DETECTION (Native AWS Batch APIs)
+    # ============================================================================
 
-    def detect_sentiment(self,                                                       # Batch sentiment detection
-                        request: Schema__Comprehend__Batch_Request                   # Batch request
-                   ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Detect_Sentiment]:  # Hash → sentiment mapping
+    def detect_sentiment(self                                                                        ,  # Batch sentiment detection using native AWS batch API
+                         request: Schema__Comprehend__Batch_Request                                   ,  # Batch request
+                    ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Batch_Item__Detect_Sentiment]:         # Hash → sentiment mapping
 
         try:
             results = self.batch_service.batch_detect_sentiment(texts         = request.texts        ,
@@ -44,9 +46,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Batch sentiment detection failed: {str(e)}")
 
-    def detect_toxic(self,                                                           # Batch toxicity detection
-                    request: Schema__Comprehend__Batch_Request                       # Batch request
-               ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Detect_Toxic_Content]:  # Hash → toxicity mapping
+    def detect_toxic(self                                                                            ,  # Batch toxicity detection (NO native batch API - uses iteration)
+                     request: Schema__Comprehend__Batch_Request                                       ,  # Batch request
+                ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Detect_Toxic_Content]:                     # Hash → toxicity mapping
 
         try:
             results = self.batch_service.batch_detect_toxic_content(texts         = request.texts        ,
@@ -57,13 +59,13 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Batch toxic detection failed: {str(e)}")
 
-    # ========================================
-    # BATCH BOOLEAN HELPERS
-    # ========================================
+    # ============================================================================
+    # BATCH BOOLEAN HELPERS (Using Native Batch APIs)
+    # ============================================================================
 
-    def is_positive(self,                                                       # Batch check if texts are positive
-                   request: Schema__Comprehend__Batch_Threshold_Request         # Batch threshold request
-              ) -> Schema__Comprehend__Batch_Boolean_Response:                  # Batch boolean response
+    def is_positive(self                                                                             ,  # Batch check if texts are positive
+                    request: Schema__Comprehend__Batch_Threshold_Request                              ,  # Batch threshold request
+               ) -> Schema__Comprehend__Batch_Boolean_Response:                                          # Batch boolean response
 
         try:
             with capture_duration() as duration:
@@ -74,8 +76,8 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
                 results = {}
                 scores  = {}
 
-                for hash_key, sentiment_result in sentiment_results.items():
-                    positive_score        = sentiment_result.score.positive
+                for hash_key, sentiment_item in sentiment_results.items():
+                    positive_score        = sentiment_item.score.positive
                     results[hash_key]     = float(positive_score) > float(request.threshold)
                     scores[hash_key]      = Safe_Float(positive_score)
 
@@ -90,9 +92,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Batch is_positive check failed: {str(e)}")
 
-    def is_negative(self,                                                       # Batch check if texts are negative
-                   request: Schema__Comprehend__Batch_Threshold_Request         # Batch threshold request
-              ) -> Schema__Comprehend__Batch_Boolean_Response:                  # Batch boolean response
+    def is_negative(self                                                                             ,  # Batch check if texts are negative
+                    request: Schema__Comprehend__Batch_Threshold_Request                              ,  # Batch threshold request
+               ) -> Schema__Comprehend__Batch_Boolean_Response:                                          # Batch boolean response
 
         try:
             with capture_duration() as duration:
@@ -103,10 +105,10 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
                 results = {}
                 scores  = {}
 
-                for hash_key, sentiment_result in sentiment_results.items():
-                    negative_score        = sentiment_result.score.negative
+                for hash_key, sentiment_item in sentiment_results.items():
+                    negative_score        = sentiment_item.score.negative
                     results[hash_key]     = float(negative_score) > float(request.threshold)
-                    scores[hash_key]      = Safe_Float(negative_score)
+                    scores [hash_key]     = Safe_Float(negative_score)
 
             return Schema__Comprehend__Batch_Boolean_Response(results   = results                        ,
                                                               scores    = scores                         ,
@@ -119,15 +121,15 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Batch is_negative check failed: {str(e)}")
 
-    def is_toxic(self,                                                          # Batch check if texts are toxic
-                request: Schema__Comprehend__Batch_Threshold_Request            # Batch threshold request
-           ) -> Schema__Comprehend__Batch_Boolean_Response:                     # Batch boolean response
+    def is_toxic(self                                                                                ,  # Batch check if texts are toxic
+                request: Schema__Comprehend__Batch_Threshold_Request                                 ,  # Batch threshold request
+           ) -> Schema__Comprehend__Batch_Boolean_Response:                                             # Batch boolean response
 
         try:
             with capture_duration() as duration:
                 toxic_results = self.batch_service.batch_detect_toxic_content(texts         = request.texts        ,
-                                                                             language_code = request.language_code,
-                                                                             use_cache     = request.use_cache    )
+                                                                              language_code = request.language_code,
+                                                                              use_cache     = request.use_cache    )
 
                 results = {}
                 scores  = {}
@@ -153,13 +155,13 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Batch is_toxic check failed: {str(e)}")
 
-    # ========================================
+    # ============================================================================
     # ROUTE SETUP
-    # ========================================
+    # ============================================================================
 
-    def setup_routes(self):                                                     # Register all route handlers
-        self.add_route_post(self.detect_sentiment)                             # Batch sentiment endpoint
-        self.add_route_post(self.detect_toxic    )                             # Batch toxicity endpoint
-        self.add_route_post(self.is_positive     )                             # Batch is_positive endpoint
-        self.add_route_post(self.is_negative     )                             # Batch is_negative endpoint
-        self.add_route_post(self.is_toxic        )                             # Batch is_toxic endpoint
+    def setup_routes(self):                                                                             # Register all route handlers
+        self.add_route_post(self.detect_sentiment)                                                     # Batch sentiment endpoint
+        self.add_route_post(self.detect_toxic    )                                                     # Batch toxicity endpoint
+        self.add_route_post(self.is_positive     )                                                     # Batch is_positive endpoint
+        self.add_route_post(self.is_negative     )                                                     # Batch is_negative endpoint
+        self.add_route_post(self.is_toxic        )                                                     # Batch is_toxic endpoint

@@ -21,7 +21,8 @@ class test_Routes__Comprehend(TestCase):
     def setUpClass(cls):
         cls.app                = FastAPI()
         cls.comprehend         = Comprehend__with_temp_role()
-        cls.comprehend_service = Comprehend__Service(comprehend         = cls.comprehend        )
+        cls.comprehend_detect  = cls.comprehend.detect()
+        cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
         cls.routes             = Routes__Comprehend (app                = cls.app               ,
                                                      comprehend_service = cls.comprehend_service).setup()
 

@@ -1,4 +1,5 @@
 from unittest                                                                                 import TestCase
+from osbot_aws.aws.comprehend.Comprehend__Detect                                              import Comprehend__Detect
 from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                      import Comprehend__with_temp_role
 from osbot_utils.testing.__                                                                   import __, __SKIP__, __GREATER_THAN__, __LESS_THAN__
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment             import Schema__Comprehend__Detect_Sentiment
@@ -18,20 +19,15 @@ class test_Comprehend__Service(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.comprehend = Comprehend__with_temp_role()                          # use this version which has a dedicated role for the Comprehend service
-        cls.service    = Comprehend__Service(comprehend=cls.comprehend)
+        cls.comprehend        = Comprehend__with_temp_role()                          # use this version which has a dedicated role for the Comprehend service
+        cls.comprehend_detect = cls.comprehend.detect()
+        cls.service           = Comprehend__Service(comprehend_detect=cls.comprehend_detect)
 
     def test__init__(self):                                                    # Test service initialization
         with self.service as _:
-            assert type(_)               is Comprehend__Service
-            assert type(_.comprehend)    is Comprehend__with_temp_role
-            assert type(_.cache_service) is Comprehend__Cache__Service
-
-            assert _.obj()               == __(comprehend=__(session_kwargs=__(aws_access_key_id=None,
-                                                                               aws_secret_access_key=None,
-                                                                               endpoint_url=None,
-                                                                               region_name=None)),
-                                               cache_service=__(namespace='aws-comprehend', hash_size=10))
+            assert type(_)                   is Comprehend__Service
+            assert type(_.comprehend_detect) is Comprehend__Detect
+            assert type(_.cache_service    ) is Comprehend__Cache__Service
 
     # ========================================
     # detect_sentiment Tests
@@ -115,7 +111,7 @@ class test_Comprehend__Service(TestCase):
 
         assert type(result)         is Schema__Comprehend__Detect_Dominant_Language
         assert len(result.languages) > 0
-        assert result.languages[0].language_code == Enum__Comprehend__Language_Code.ENGLISH
+        assert result.languages[0].language_code == 'en'
 
     def test__detect_dominant_language__spanish(self):                         # Test language detection for Spanish
         text   = Safe_Str__Comprehend__Text("Hola mundo")
