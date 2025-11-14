@@ -1,7 +1,6 @@
-import pytest
 from unittest                                                                                 import TestCase
+from osbot_aws.aws.comprehend.Comprehend                                                      import Comprehend
 from osbot_aws.aws.comprehend.Comprehend__Detect                                              import Comprehend__Detect
-from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                      import Comprehend__with_temp_role
 from osbot_utils.testing.__                                                                   import __, __SKIP__, __GREATER_THAN__, __LESS_THAN__
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment             import Schema__Comprehend__Detect_Sentiment
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Key_Phrases           import Schema__Comprehend__Detect_Key_Phrases
@@ -12,7 +11,6 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Syntax  
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content         import Schema__Comprehend__Detect_Toxic_Content
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                   import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                 import Safe_Str__Comprehend__Text
-from osbot_utils.utils.Env                                                                    import in_github_action
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                             import Comprehend__Service
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Cache__Service                      import Comprehend__Cache__Service
 
@@ -21,9 +19,9 @@ class test_Comprehend__Service(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if in_github_action():
-            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
-        cls.comprehend        = Comprehend__with_temp_role()                          # use this version which has a dedicated role for the Comprehend service
+        # if in_github_action():
+        #     pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+        cls.comprehend        = Comprehend()  #Comprehend__with_temp_role()                          # use this version which has a dedicated role for the Comprehend service
         cls.comprehend_detect = cls.comprehend.detect()
         cls.service           = Comprehend__Service(comprehend_detect=cls.comprehend_detect)
 

@@ -1,4 +1,6 @@
 from fastapi                                                                                        import HTTPException
+from osbot_aws.aws.comprehend.Comprehend                                                            import Comprehend
+from osbot_utils.decorators.methods.cache_on_self                                                   import cache_on_self
 from osbot_utils.helpers.duration.decorators.capture_duration                                       import capture_duration
 from osbot_utils.type_safe.primitives.core.Safe_Float                                               import Safe_Float
 from osbot_fast_api.api.routes.Fast_API__Routes                                                     import Fast_API__Routes
@@ -23,8 +25,15 @@ ROUTES_PATHS__COMPREHEND_HELPERS = [f'/{TAG__ROUTES_COMPREHEND_HELPERS}' + '/is-
 
 
 class Routes__Comprehend__Helpers(Fast_API__Routes):                           # Helper routes - simplified boolean/threshold-based endpoints
-    tag                 : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_HELPERS  # OpenAPI tag
-    comprehend_service  : Comprehend__Service                                   # Main Comprehend service
+    tag        : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_HELPERS  # OpenAPI tag
+    comprehend : Comprehend     
+    
+    
+    @cache_on_self
+    def comprehend_service(self) -> Comprehend__Service:
+        comprehend_detect  = self.comprehend.detect()
+        comprehend_service = Comprehend__Service(comprehend_detect=comprehend_detect)
+        return comprehend_service
 
     # ========================================
     # SENTIMENT HELPERS
@@ -36,9 +45,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                sentiment_result = self.comprehend_service.detect_sentiment(text          = request.text         ,
-                                                                           language_code = request.language_code,
-                                                                           use_cache     = request.use_cache    )
+                sentiment_result = self.comprehend_service().detect_sentiment(text          = request.text         ,
+                                                                             language_code = request.language_code,
+                                                                             use_cache     = request.use_cache    )
 
                 positive_score = sentiment_result.score.positive
                 result         = float(positive_score) > float(request.threshold)
@@ -59,9 +68,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                sentiment_result = self.comprehend_service.detect_sentiment(text          = request.text         ,
-                                                                            language_code = request.language_code,
-                                                                            use_cache     = request.use_cache    )
+                sentiment_result = self.comprehend_service().detect_sentiment(text          = request.text         ,
+                                                                              language_code = request.language_code,
+                                                                              use_cache     = request.use_cache    )
 
                 negative_score = sentiment_result.score.negative
                 result         = float(negative_score) > float(request.threshold)
@@ -82,9 +91,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                sentiment_result = self.comprehend_service.detect_sentiment(text          = request.text         ,
-                                                                           language_code = request.language_code,
-                                                                           use_cache     = request.use_cache    )
+                sentiment_result = self.comprehend_service().detect_sentiment(text          = request.text         ,
+                                                                             language_code = request.language_code,
+                                                                             use_cache     = request.use_cache    )
 
                 neutral_score = sentiment_result.score.neutral
                 result        = float(neutral_score) > float(request.threshold)
@@ -109,9 +118,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                toxic_result = self.comprehend_service.detect_toxic_content(text          = request.text         ,
-                                                                           language_code = request.language_code,
-                                                                           use_cache     = request.use_cache    )
+                toxic_result = self.comprehend_service().detect_toxic_content(text          = request.text         ,
+                                                                             language_code = request.language_code,
+                                                                             use_cache     = request.use_cache    )
 
                 # Check if any toxicity label exceeds threshold
                 max_score = Safe_Float(0.0)
@@ -141,9 +150,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                sentiment_result = self.comprehend_service.detect_sentiment(text          = request.text         ,
-                                                                           language_code = request.language_code,
-                                                                           use_cache     = request.use_cache    )
+                sentiment_result = self.comprehend_service().detect_sentiment(text          = request.text         ,
+                                                                             language_code = request.language_code,
+                                                                             use_cache     = request.use_cache    )
 
             return Schema__Comprehend__Sentiment_Score_Response(
                 positive = sentiment_result.score.positive,
@@ -163,9 +172,9 @@ class Routes__Comprehend__Helpers(Fast_API__Routes):                           #
 
         try:
             with capture_duration() as duration:
-                toxic_result = self.comprehend_service.detect_toxic_content(text          = request.text         ,
-                                                                           language_code = request.language_code,
-                                                                           use_cache     = request.use_cache    )
+                toxic_result = self.comprehend_service().detect_toxic_content(text          = request.text         ,
+                                                                             language_code = request.language_code,
+                                                                             use_cache     = request.use_cache    )
 
                 # Convert labels list to scores dict
                 scores = {}

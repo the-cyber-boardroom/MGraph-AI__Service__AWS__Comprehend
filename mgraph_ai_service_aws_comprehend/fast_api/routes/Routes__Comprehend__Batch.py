@@ -1,5 +1,7 @@
 from typing                                                                                         import Dict
 from fastapi                                                                                        import HTTPException
+from osbot_aws.aws.comprehend.Comprehend                                                            import Comprehend
+from osbot_utils.decorators.methods.cache_on_self                                                   import cache_on_self
 from osbot_utils.helpers.duration.decorators.capture_duration                                       import capture_duration
 from osbot_utils.type_safe.primitives.core.Safe_Float                                               import Safe_Float
 from osbot_utils.type_safe.primitives.core.Safe_UInt                                                import Safe_UInt
@@ -13,7 +15,7 @@ from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Threshold_Request   import Schema__Comprehend__Batch_Threshold_Request
 from mgraph_ai_service_aws_comprehend.schemas.response.Schema__Comprehend__Batch_Boolean_Response   import Schema__Comprehend__Batch_Boolean_Response
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Batch__Service                            import Comprehend__Batch__Service
-
+from mgraph_ai_service_aws_comprehend.service.Comprehend__Service import Comprehend__Service
 
 TAG__ROUTES_COMPREHEND_BATCH   = 'comprehend-batch'
 ROUTES_PATHS__COMPREHEND_BATCH = [f'/{TAG__ROUTES_COMPREHEND_BATCH}' + '/detect-sentiment'  ,  # Batch endpoints
@@ -25,9 +27,20 @@ ROUTES_PATHS__COMPREHEND_BATCH = [f'/{TAG__ROUTES_COMPREHEND_BATCH}' + '/detect-
 
 # todo: refactor the logic on the is_* methods (and the helper method) into a separate service class
 #       since these Route_* classes should have no business logic
-class Routes__Comprehend__Batch(Fast_API__Routes):                                                     # Batch routes - process multiple texts at once using native AWS batch APIs
-    tag           : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_BATCH                      # OpenAPI tag
-    batch_service : Comprehend__Batch__Service                                                         # Batch processing service
+class Routes__Comprehend__Batch(Fast_API__Routes):                                                      # Batch routes - process multiple texts at once using native AWS batch APIs
+    tag        : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND_BATCH                          # OpenAPI tag    
+    comprehend : Comprehend     
+
+    @cache_on_self
+    def batch_service(self) -> Comprehend__Batch__Service:                            
+        comprehend_detect  = self.comprehend.detect()
+        comprehend_batch   = self.comprehend.batch()
+        comprehend_service = Comprehend__Service(comprehend_detect=comprehend_detect)
+        batch_service      = Comprehend__Batch__Service(comprehend_batch  = comprehend_batch  ,
+                                                       comprehend_service = comprehend_service)
+        return batch_service
+        
+    
 
     # ============================================================================
     # BATCH DETECTION (Native AWS Batch APIs)
@@ -38,9 +51,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
                     ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Batch_Item__Detect_Sentiment]:         # Hash → sentiment mapping
 
         try:
-            results = self.batch_service.batch_detect_sentiment(texts         = request.texts        ,
-                                                                language_code = request.language_code,
-                                                                use_cache     = request.use_cache    )
+            results = self.batch_service().batch_detect_sentiment(texts         = request.texts        ,
+                                                                  language_code = request.language_code,
+                                                                  use_cache     = request.use_cache    )
             return results
 
         except Exception as e:
@@ -51,9 +64,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
                 ) -> Dict[Safe_Str__Hash, Schema__Comprehend__Detect_Toxic_Content]:                     # Hash → toxicity mapping
 
         try:
-            results = self.batch_service.batch_detect_toxic_content(texts         = request.texts        ,
-                                                                    language_code = request.language_code,
-                                                                    use_cache     = request.use_cache    )
+            results = self.batch_service().batch_detect_toxic_content(texts         = request.texts        ,
+                                                                      language_code = request.language_code,
+                                                                      use_cache     = request.use_cache    )
             return results
 
         except Exception as e:
@@ -69,9 +82,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
 
         try:
             with capture_duration() as duration:
-                sentiment_results = self.batch_service.batch_detect_sentiment(texts         = request.texts        ,
-                                                                              language_code = request.language_code,
-                                                                              use_cache     = request.use_cache    )
+                sentiment_results = self.batch_service().batch_detect_sentiment(texts         = request.texts        ,
+                                                                                language_code = request.language_code,
+                                                                                use_cache     = request.use_cache    )
 
                 results = {}
                 scores  = {}
@@ -98,9 +111,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
 
         try:
             with capture_duration() as duration:
-                sentiment_results = self.batch_service.batch_detect_sentiment(texts         = request.texts        ,
-                                                                              language_code = request.language_code,
-                                                                              use_cache     = request.use_cache    )
+                sentiment_results = self.batch_service().batch_detect_sentiment(texts         = request.texts        ,
+                                                                                language_code = request.language_code,
+                                                                                use_cache     = request.use_cache    )
 
                 results = {}
                 scores  = {}
@@ -127,9 +140,9 @@ class Routes__Comprehend__Batch(Fast_API__Routes):                              
 
         try:
             with capture_duration() as duration:
-                toxic_results = self.batch_service.batch_detect_toxic_content(texts         = request.texts        ,
-                                                                              language_code = request.language_code,
-                                                                              use_cache     = request.use_cache    )
+                toxic_results = self.batch_service().batch_detect_toxic_content(texts         = request.texts        ,
+                                                                                language_code = request.language_code,
+                                                                                use_cache     = request.use_cache    )
 
                 results = {}
                 scores  = {}

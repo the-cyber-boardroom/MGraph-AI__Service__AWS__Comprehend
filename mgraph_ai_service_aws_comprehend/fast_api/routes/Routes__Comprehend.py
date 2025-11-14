@@ -1,4 +1,5 @@
 from fastapi                                                                                  import HTTPException
+from osbot_aws.aws.comprehend.Comprehend                                                      import Comprehend
 from osbot_fast_api.api.routes.Fast_API__Routes                                               import Fast_API__Routes
 from osbot_fast_api.api.schemas.safe_str.Safe_Str__Fast_API__Route__Tag                       import Safe_Str__Fast_API__Route__Tag
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment             import Schema__Comprehend__Detect_Sentiment
@@ -8,6 +9,7 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Dominant
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Pii_Entities          import Schema__Comprehend__Detect_Pii_Entities
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Syntax                import Schema__Comprehend__Detect_Syntax
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content         import Schema__Comprehend__Detect_Toxic_Content
+from osbot_utils.decorators.methods.cache_on_self                                             import cache_on_self
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Request             import Schema__Comprehend__Request
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                             import Comprehend__Service
 
@@ -22,22 +24,29 @@ ROUTES_PATHS__COMPREHEND = [f'/{TAG__ROUTES_COMPREHEND}' + '/detect-sentiment'  
                             f'/{TAG__ROUTES_COMPREHEND}' + '/detect-toxic-content'     ]
 
 
-class Routes__Comprehend(Fast_API__Routes):                                    # Main FastAPI routes - direct AWS Comprehend API wrappers
-    tag                 : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND  # OpenAPI tag
-    comprehend_service  : Comprehend__Service                                   # Main Comprehend service
+class Routes__Comprehend(Fast_API__Routes):                                         # Main FastAPI routes - direct AWS Comprehend API wrappers
+    tag                 : Safe_Str__Fast_API__Route__Tag = TAG__ROUTES_COMPREHEND   # OpenAPI tag
+    comprehend          : Comprehend     
+
+    @cache_on_self
+    def comprehend_service(self) -> Comprehend__Service:
+        comprehend_detect  = self.comprehend.detect()
+        comprehend_service = Comprehend__Service(comprehend_detect=comprehend_detect)
+        return comprehend_service
 
     # ========================================
     # SENTIMENT DETECTION
     # ========================================
 
-    def detect_sentiment(self,                                                  # Detect sentiment in text
-                        request: Schema__Comprehend__Request                    # Comprehend request
-                   ) -> Schema__Comprehend__Detect_Sentiment:                   # Sentiment detection result
+
+    def detect_sentiment(self,                                                   # Detect sentiment in text
+                         request: Schema__Comprehend__Request                    # Comprehend request
+                    ) -> Schema__Comprehend__Detect_Sentiment:                   # Sentiment detection result
 
         try:
-            result = self.comprehend_service.detect_sentiment(text          = request.text         ,
-                                                              language_code = request.language_code,
-                                                              use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_sentiment(text          = request.text         ,
+                                                                language_code = request.language_code,
+                                                                use_cache     = request.use_cache    )
             return result
 
         except Exception as e:
@@ -52,9 +61,9 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                      ) -> Schema__Comprehend__Detect_Key_Phrases:               # Key phrases detection result
 
         try:
-            result = self.comprehend_service.detect_key_phrases(text          = request.text         ,
-                                                                language_code = request.language_code,
-                                                                use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_key_phrases(text          = request.text         ,
+                                                                  language_code = request.language_code,
+                                                                  use_cache     = request.use_cache    )
             return result
 
         except Exception as e:
@@ -69,9 +78,9 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                   ) -> Schema__Comprehend__Detect_Entities:                     # Entity detection result
 
         try:
-            result = self.comprehend_service.detect_entities(text          = request.text         ,
-                                                             language_code = request.language_code,
-                                                             use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_entities(text          = request.text         ,
+                                                               language_code = request.language_code,
+                                                               use_cache     = request.use_cache    )
             return result
 
         except Exception as e:
@@ -86,8 +95,8 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                            ) -> Schema__Comprehend__Detect_Dominant_Language:   # Language detection result
 
         try:
-            result = self.comprehend_service.detect_dominant_language(text      = request.text     ,
-                                                                      use_cache = request.use_cache)
+            result = self.comprehend_service().detect_dominant_language(text      = request.text     ,
+                                                                        use_cache = request.use_cache)
             return result
 
         except Exception as e:
@@ -102,9 +111,9 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                       ) -> Schema__Comprehend__Detect_Pii_Entities:             # PII entity detection result
 
         try:
-            result = self.comprehend_service.detect_pii_entities(text          = request.text         ,
-                                                                 language_code = request.language_code,
-                                                                 use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_pii_entities(text          = request.text         ,
+                                                                   language_code = request.language_code,
+                                                                   use_cache     = request.use_cache    )
             return result
 
         except Exception as e:
@@ -119,9 +128,9 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                 ) -> Schema__Comprehend__Detect_Syntax:                         # Syntax detection result
 
         try:
-            result = self.comprehend_service.detect_syntax(text          = request.text         ,
-                                                           language_code = request.language_code,
-                                                           use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_syntax(text          = request.text         ,
+                                                             language_code = request.language_code,
+                                                             use_cache     = request.use_cache    )
             return result
 
         except Exception as e:
@@ -136,9 +145,9 @@ class Routes__Comprehend(Fast_API__Routes):                                    #
                        ) -> Schema__Comprehend__Detect_Toxic_Content:           # Toxic content detection result
 
         try:
-            result = self.comprehend_service.detect_toxic_content(text          = request.text         ,
-                                                                  language_code = request.language_code,
-                                                                  use_cache     = request.use_cache    )
+            result = self.comprehend_service().detect_toxic_content(text          = request.text         ,
+                                                                    language_code = request.language_code,
+                                                                    use_cache     = request.use_cache    )
             return result
 
         except Exception as e:

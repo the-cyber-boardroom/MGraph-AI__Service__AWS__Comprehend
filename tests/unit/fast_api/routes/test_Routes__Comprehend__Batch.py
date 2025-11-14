@@ -1,7 +1,5 @@
-import pytest
 from unittest                                                                                     import TestCase
 from fastapi                                                                                      import FastAPI
-from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                          import Comprehend__with_temp_role
 from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment      import Schema__Comprehend__Batch_Item__Detect_Sentiment
 from osbot_utils.type_safe.primitives.core.Safe_Float                                             import Safe_Float
 from osbot_utils.type_safe.primitives.core.Safe_UInt                                              import Safe_UInt
@@ -11,38 +9,37 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Co
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                       import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                     import Safe_Str__Comprehend__Text
 from osbot_utils.type_safe.type_safe_core.collections.Type_Safe__Dict                             import Type_Safe__Dict
-from osbot_utils.utils.Env                                                                        import in_github_action
 from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend__Batch                   import Routes__Comprehend__Batch
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Request           import Schema__Comprehend__Batch_Request
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Batch_Threshold_Request import Schema__Comprehend__Batch_Threshold_Request
 from mgraph_ai_service_aws_comprehend.schemas.response.Schema__Comprehend__Batch_Boolean_Response import Schema__Comprehend__Batch_Boolean_Response
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Batch__Service                          import Comprehend__Batch__Service
-from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                                 import Comprehend__Service
 
 
 class test_Routes__Comprehend__Batch(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if in_github_action():
-            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+        # if in_github_action():
+        #     pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+        #
+        # cls.app    = FastAPI()
+        # cls.comprehend         = Comprehend__with_temp_role()
+        # cls.comprehend_detect  = cls.comprehend.detect()
+        # cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
+        # cls.comprehend_batch   = cls.comprehend.batch()
+        # cls.batch_service      = Comprehend__Batch__Service(comprehend_batch   = cls.comprehend_batch  ,
+        #                                                     comprehend_service = cls.comprehend_service)
+        # cls.routes             = Routes__Comprehend__Batch (app           = cls.app          ,
+        #                                                     batch_service = cls.batch_service).setup()
 
-        cls.app    = FastAPI()
-        cls.comprehend         = Comprehend__with_temp_role()
-        cls.comprehend_detect  = cls.comprehend.detect()
-        cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
-        cls.comprehend_batch   = cls.comprehend.batch()
-        cls.batch_service      = Comprehend__Batch__Service(comprehend_batch   = cls.comprehend_batch  ,
-                                                            comprehend_service = cls.comprehend_service)
-        cls.routes             = Routes__Comprehend__Batch (app           = cls.app          ,
-                                                            batch_service = cls.batch_service).setup()
+        cls.routes = Routes__Comprehend__Batch(app=FastAPI()).setup()
 
     def test__setUpClass(self):                                                # Test routes setup
         with self.routes as _:
             assert type(_)                  is Routes__Comprehend__Batch
             assert _.tag                    == 'comprehend-batch'
-            assert type(_.batch_service)   is Comprehend__Batch__Service
-            assert _.app                    == self.app
+            assert type(_.batch_service())  is Comprehend__Batch__Service
             assert _.routes_paths()         == [ '/detect-sentiment',
                                                  '/detect-toxic'    ,
                                                  '/is-negative'     ,

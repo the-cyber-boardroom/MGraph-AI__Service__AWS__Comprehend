@@ -1,7 +1,6 @@
-import pytest
 from unittest                                                                                import TestCase
+from osbot_aws.aws.comprehend.Comprehend                                                     import Comprehend
 from osbot_aws.aws.comprehend.Comprehend__Batch                                              import Comprehend__Batch
-from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                     import Comprehend__with_temp_role
 from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment import Schema__Comprehend__Batch_Item__Detect_Sentiment
 from osbot_utils.testing.__                                                                  import __, __SKIP__, __LESS_THAN__, __GREATER_THAN__
 from osbot_utils.type_safe.primitives.domains.cryptography.safe_str.Safe_Str__Hash           import Safe_Str__Hash
@@ -9,7 +8,6 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Co
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                  import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                import Safe_Str__Comprehend__Text
 from osbot_utils.type_safe.type_safe_core.collections.Type_Safe__Dict                        import Type_Safe__Dict
-from osbot_utils.utils.Env                                                                   import in_github_action
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Cache__Service                     import Comprehend__Cache__Service
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                            import Comprehend__Service
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Batch__Service                     import Comprehend__Batch__Service
@@ -19,14 +17,15 @@ class test_Comprehend__Batch__Service(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if in_github_action():
-            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
-        cls.comprehend          = Comprehend__with_temp_role()
+        # if in_github_action():
+        #     pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+        cls.comprehend          = Comprehend()      # Comprehend__with_temp_role()
         cls.comprehend_detect   = cls.comprehend.detect()
         cls.comprehend_batch    = cls.comprehend.batch()
         cls.comprehend_service  = Comprehend__Service       (comprehend_detect  = cls.comprehend_detect )
         cls.batch_service       = Comprehend__Batch__Service(comprehend_service = cls.comprehend_service,
                                                              comprehend_batch   = cls.comprehend_batch  )
+
 
     def test__init__(self):                                                    # Test batch service initialization
         with self.batch_service as _:

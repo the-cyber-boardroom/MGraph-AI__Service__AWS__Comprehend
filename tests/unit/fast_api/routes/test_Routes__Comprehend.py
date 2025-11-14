@@ -1,7 +1,6 @@
-import pytest
 from unittest                                                                                 import TestCase
 from fastapi                                                                                  import FastAPI
-from osbot_aws.aws.comprehend.Comprehend__IAM__Temp_Role                                      import Comprehend__with_temp_role
+from osbot_aws.aws.comprehend.Comprehend                                                      import Comprehend
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Sentiment             import Schema__Comprehend__Detect_Sentiment
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Key_Phrases           import Schema__Comprehend__Detect_Key_Phrases
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Entities              import Schema__Comprehend__Detect_Entities
@@ -11,7 +10,6 @@ from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Syntax  
 from osbot_aws.aws.comprehend.schemas.detect.Schema__Comprehend__Detect_Toxic_Content         import Schema__Comprehend__Detect_Toxic_Content
 from osbot_aws.aws.comprehend.schemas.enums.Enum__Comprehend__Language_Code                   import Enum__Comprehend__Language_Code
 from osbot_aws.aws.comprehend.schemas.safe_str.Safe_Str__AWS_Comprehend__Text                 import Safe_Str__Comprehend__Text
-from osbot_utils.utils.Env                                                                    import in_github_action
 from mgraph_ai_service_aws_comprehend.fast_api.routes.Routes__Comprehend                      import Routes__Comprehend
 from mgraph_ai_service_aws_comprehend.schemas.request.Schema__Comprehend__Request             import Schema__Comprehend__Request
 from mgraph_ai_service_aws_comprehend.service.Comprehend__Service                             import Comprehend__Service
@@ -21,21 +19,23 @@ class test_Routes__Comprehend(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if in_github_action():
-            pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
-        cls.app                = FastAPI()
-        cls.comprehend         = Comprehend__with_temp_role()
-        cls.comprehend_detect  = cls.comprehend.detect()
-        cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
-        cls.routes             = Routes__Comprehend (app                = cls.app               ,
-                                                     comprehend_service = cls.comprehend_service).setup()
+        # if in_github_action():
+        #     pytest.skip("Skipping this test on GitHub Actions (since it needs AWS Auth")
+        #cls.app                = FastAPI()
+        # cls.comprehend         = Comprehend__with_temp_role()
+        # cls.comprehend_detect  = cls.comprehend.detect()
+        # cls.comprehend_service = Comprehend__Service(comprehend_detect  = cls.comprehend_detect )
+        # cls.routes             = Routes__Comprehend (app                = cls.app               ,
+        #                                              comprehend_service = cls.comprehend_service).setup()
+        # when using the AWS credentials, this all we need
+        cls.routes = Routes__Comprehend(app=FastAPI()).setup()
 
     def test__setUpClass(self):                                                # Test routes setup
         with self.routes as _:
             assert type(_)                       is Routes__Comprehend
             assert _.tag                         == 'comprehend'
-            assert type(_.comprehend_service)   is Comprehend__Service
-            assert _.app                         == self.app
+            assert type(_.comprehend          )  is Comprehend
+            assert type(_.comprehend_service())  is Comprehend__Service
             assert _.routes_paths()              == [ '/detect-dominant-language',          # the .routes_paths don't have the TAG__ROUTES_COMPREHEND prefix
                                                       '/detect-entities'         ,
                                                       '/detect-key-phrases'      ,
