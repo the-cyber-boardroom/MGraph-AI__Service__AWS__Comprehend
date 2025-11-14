@@ -2,5 +2,5 @@ from mgraph_ai_service_aws__comprehend import package_name
 
 SERVICE_NAME                             = package_name
 FAST_API__TITLE                          = "MGraph AI Service AWS Comprehend"
-FAST_API__DESCRIPTION                    = "Base template for MGraph-AI microservices"
-LAMBDA_DEPENDENCIES__FAST_API_SERVERLESS = ['osbot-fast-api-serverless==v1.2.0']
+FAST_API__DESCRIPTION                    = "Text classification service based on AWS Comprehend "
+LAMBDA_DEPENDENCIES__AWS__COMPREHEND    = ['osbot-fast-api-serverless==v1.27.0']
