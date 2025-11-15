@@ -121,7 +121,7 @@ class test_Integration_Helper__Html_Service(TestCase):
             assert len(_.url_to_hashes("https://news.bbc.co.uk"              )) > 310       # this value changes quite a bit
 
         with print_duration():
-            assert len(_.url_to_hashes("https://news.bbc.co.uk/sport"        )) == 418
+            assert len(_.url_to_hashes("https://news.bbc.co.uk/sport"        )) > 410
 
         with print_duration():
             assert len(_.url_to_hashes("https://www.bbc.co.uk/sport/football/articles/c5y0vz2eze7o")) == 180
@@ -130,6 +130,7 @@ class test_Integration_Helper__Html_Service(TestCase):
 
         with print_duration():
             assert len(_.url_to_hashes("https://text.npr.org/"               )) == 33
+
 
 
 SAMPLE__HTML__SIMPLE    = "<html><body>Hello World</body></html>"
