@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                     import TestCase
 from fastapi                                                                                      import FastAPI
 from osbot_aws.aws.comprehend.schemas.batch.Schema__Comprehend__Batch_Item__Detect_Sentiment      import Schema__Comprehend__Batch_Item__Detect_Sentiment
@@ -94,6 +95,7 @@ class test_Routes__Comprehend__Batch(TestCase):
     # ========================================
 
     def test__detect_toxic__single_text(self):                                 # Test batch toxicity with single text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts   = {Safe_Str__Hash("abc1234567"): Safe_Str__Comprehend__Text("Test text")}
         request = Schema__Comprehend__Batch_Request(texts         = texts                                    ,
                                                     language_code = Enum__Comprehend__Language_Code.ENGLISH,
@@ -107,6 +109,7 @@ class test_Routes__Comprehend__Batch(TestCase):
         assert type(response[Safe_Str__Hash("abc1234567")]) is Schema__Comprehend__Detect_Toxic_Content
 
     def test__detect_toxic__multiple_texts(self):                              # Test batch toxicity with multiple texts
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts   = {Safe_Str__Hash("aaa1234567"): Safe_Str__Comprehend__Text("Clean"),
                    Safe_Str__Hash("bbb1234567"): Safe_Str__Comprehend__Text("Rude") ,
                    Safe_Str__Hash("ccc1234567"): Safe_Str__Comprehend__Text("Normal")}
@@ -191,6 +194,7 @@ class test_Routes__Comprehend__Batch(TestCase):
     # ========================================
 
     def test__is_toxic__single_text(self):                                     # Test batch is_toxic with single text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts   = {Safe_Str__Hash("abc1234567"): Safe_Str__Comprehend__Text("You are an idiot")}
         request = Schema__Comprehend__Batch_Threshold_Request(texts         = texts                                    ,
                                                               threshold     = Safe_Float(0.5)                        ,
@@ -203,6 +207,7 @@ class test_Routes__Comprehend__Batch(TestCase):
         assert response.operation == Safe_Str__Text('is_toxic')
 
     def test__is_toxic__multiple_texts(self):                                  # Test batch is_toxic with multiple texts
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts   = {Safe_Str__Hash("aaa1234567"): Safe_Str__Comprehend__Text("Clean text"),
                    Safe_Str__Hash("bbb1234567"): Safe_Str__Comprehend__Text("Rude text") }
         request = Schema__Comprehend__Batch_Threshold_Request(texts         = texts                                    ,

@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                       import TestCase
 from fastapi                                                                                        import FastAPI
 from osbot_utils.type_safe.primitives.core.Safe_Float                                               import Safe_Float
@@ -130,6 +131,7 @@ class test_Routes__Comprehend__Helpers(TestCase):
     # ========================================
 
     def test__is_toxic__clean_text(self):                                      # Test is_toxic with clean text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Threshold_Request(text          = Safe_Str__Comprehend__Text("Have a nice day"),
                                                         threshold     = Safe_Float(0.5)                              ,
                                                         language_code = Enum__Comprehend__Language_Code.ENGLISH      ,
@@ -142,6 +144,7 @@ class test_Routes__Comprehend__Helpers(TestCase):
         assert 0.0 <= response.score <= 1.0
 
     def test__is_toxic__rude_text(self):                                       # Test is_toxic with rude text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Threshold_Request(text          = Safe_Str__Comprehend__Text("You are stupid"),
                                                         threshold     = Safe_Float(0.5)                             ,
                                                         language_code = Enum__Comprehend__Language_Code.ENGLISH     ,
@@ -187,6 +190,7 @@ class test_Routes__Comprehend__Helpers(TestCase):
     # ========================================
 
     def test__toxicity_score__basic(self):                                     # Test toxicity_score endpoint
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Request(text          = Safe_Str__Comprehend__Text("Test text"),
                                               language_code = Enum__Comprehend__Language_Code.ENGLISH,
                                               use_cache     = False                                  )
@@ -200,6 +204,7 @@ class test_Routes__Comprehend__Helpers(TestCase):
         assert response.duration             > 0
 
     def test__toxicity_score__clean_text(self):                                # Test toxicity_score with clean text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Request(text          = Safe_Str__Comprehend__Text("Have a nice day"),
                                               language_code = Enum__Comprehend__Language_Code.ENGLISH       ,
                                               use_cache     = False                                         )

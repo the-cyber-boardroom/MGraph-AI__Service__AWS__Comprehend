@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                 import TestCase
 from fastapi                                                                                  import FastAPI
 from osbot_aws.aws.comprehend.Comprehend                                                      import Comprehend
@@ -190,6 +191,7 @@ class test_Routes__Comprehend(TestCase):
     # ========================================
 
     def test__detect_toxic_content__clean(self):                               # Test toxicity with clean text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Request(text          = Safe_Str__Comprehend__Text("Have a nice day"),
                                               language_code = Enum__Comprehend__Language_Code.ENGLISH       ,
                                               use_cache     = False                                         )
@@ -200,6 +202,7 @@ class test_Routes__Comprehend(TestCase):
         assert len(response.labels) > 0
 
     def test__detect_toxic_content__rude(self):                                # Test toxicity with rude text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         request = Schema__Comprehend__Request(text          = Safe_Str__Comprehend__Text("You are stupid"),
                                               language_code = Enum__Comprehend__Language_Code.ENGLISH      ,
                                               use_cache     = False                                        )

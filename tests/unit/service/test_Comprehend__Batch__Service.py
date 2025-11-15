@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                import TestCase
 from osbot_aws.aws.comprehend.Comprehend                                                     import Comprehend
 from osbot_aws.aws.comprehend.Comprehend__Batch                                              import Comprehend__Batch
@@ -127,6 +128,7 @@ class test_Comprehend__Batch__Service(TestCase):
     # ========================================
 
     def test__batch_detect_toxic_content__single_text(self):                   # Test batch toxicity with single text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts = {Safe_Str__Hash("abc1234567"): Safe_Str__Comprehend__Text("Test text")}
 
         results = self.batch_service.batch_detect_toxic_content(texts         = texts                                    ,
@@ -149,6 +151,7 @@ class test_Comprehend__Batch__Service(TestCase):
 
 
     def test__batch_detect_toxic_content__multiple_texts(self):                # Test batch toxicity with multiple texts
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts = { "aaa1234567": "Clean text"   ,
                   "bbb1234567": "Rude text"    ,
                   "ccc1234567": "Normal text"  }
@@ -201,6 +204,7 @@ class test_Comprehend__Batch__Service(TestCase):
         assert len(results)  == 0
 
     def test__batch_detect_toxic_content__with_cache(self):                    # Test batch toxicity with caching enabled
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         texts = {Safe_Str__Hash("abc1234567"): Safe_Str__Comprehend__Text("Test")}
 
         results = self.batch_service.batch_detect_toxic_content(texts         = texts                                    ,

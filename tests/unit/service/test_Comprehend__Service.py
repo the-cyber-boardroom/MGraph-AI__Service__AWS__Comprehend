@@ -1,3 +1,4 @@
+import pytest
 from unittest                                                                                 import TestCase
 from osbot_aws.aws.comprehend.Comprehend                                                      import Comprehend
 from osbot_aws.aws.comprehend.Comprehend__Detect                                              import Comprehend__Detect
@@ -155,6 +156,7 @@ class test_Comprehend__Service(TestCase):
     # ========================================
 
     def test__detect_toxic_content__clean(self):                               # Test toxicity detection with clean text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         text   = Safe_Str__Comprehend__Text("Have a great day")
         result = self.service.detect_toxic_content(text, use_cache=False)
 
@@ -162,6 +164,7 @@ class test_Comprehend__Service(TestCase):
         assert len(result.labels) > 0
 
     def test__detect_toxic_content__rude(self):                                # Test toxicity detection with rude text
+        pytest.skip("Toxic content detection - not available on eu-west-2 (London) ")
         text   = Safe_Str__Comprehend__Text("You are an idiot")
         result = self.service.detect_toxic_content(text, use_cache=False)
 
